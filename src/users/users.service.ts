@@ -38,7 +38,7 @@ export class UsersService {
         }
     }
 
-    create(userForCreate: CreateUserDto): UserDto {
+    create(userForCreate: CreateUserDto): ResponseUserDto {
         const { login, password } = userForCreate;
         const createDate = Date.now();
 
@@ -53,24 +53,32 @@ export class UsersService {
 
         this.users.push(createdUser);
 
-        return createdUser;
+        return {
+            id: createdUser.id,
+            login,
+            version: createdUser.version,
+            createdAt: createDate,
+            updatedAt: createDate
+        } as ResponseUserDto;
     }
 
-    updatePassword(userId: string, passwords: UpdatePasswordDto): UserDto | DbEnum {
+    updatePassword(userId: string, passwords: UpdatePasswordDto): ResponseUserDto | DbEnum {
         const userForUpdate = this.users.find((user) => user.id === userId);
 
         if (!userForUpdate) {
             return DbEnum.notFound;
         }
 
-        if (userForUpdate.password === passwords.oldPassword) {
-            userForUpdate.password = passwords.newPassword;
-            userForUpdate.updatedAt = Date.now();
-            userForUpdate.version++;
-            return userForUpdate;
-        } else {
-            return DbEnum.incorrectFiels;
+        if (userForUpdate.password !== passwords.oldPassword) {
+            return DbEnum.incorrectFields;
         }
+
+        userForUpdate.password = passwords.newPassword;
+        userForUpdate.updatedAt = Date.now();
+        userForUpdate.version++;
+
+        const { id, login, version, createdAt, updatedAt } = userForUpdate;
+        return { id, login, version, createdAt, updatedAt } as ResponseUserDto;
     }
 
     delete(userId: string): DbEnum | string {

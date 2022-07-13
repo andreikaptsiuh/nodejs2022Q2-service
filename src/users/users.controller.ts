@@ -35,7 +35,7 @@ export class UsersController {
     }
 
     @Post()
-    create(@Res({ passthrough: true }) res: Response, @Body() createUser: CreateUserDto): UserDto | string {
+    create(@Res({ passthrough: true }) res: Response, @Body() createUser: CreateUserDto): ResponseUserDto | string {
         if (!createUser.login || !createUser.password) {
             res.status(HttpStatus.BAD_REQUEST);
             return 'Login and password fields is required!'
@@ -45,11 +45,16 @@ export class UsersController {
     }
 
     @Put(':id')
-    update(@Res({ passthrough: true }) res: Response, @Param('id') id: string, @Body() passwords: UpdatePasswordDto): UserDto | string {
+    update(@Res({ passthrough: true }) res: Response, @Param('id') id: string, @Body() passwords: UpdatePasswordDto): ResponseUserDto | string {
         if (!validate(id)) {
             res.status(HttpStatus.BAD_REQUEST);
             return 'Id not valid';
         };
+
+        if (passwords.oldPassword === undefined || passwords.newPassword === undefined) {
+            res.status(HttpStatus.BAD_REQUEST);
+            return 'Old password and new password fields is required!';
+        }
 
         const result = this.usersService.updatePassword(id, passwords);
 
@@ -58,7 +63,7 @@ export class UsersController {
             return `User with id: ${id} not found`;
         };
 
-        if(result === DbEnum.incorrectFiels) {
+        if(result === DbEnum.incorrectFields) {
             res.status(HttpStatus.FORBIDDEN);
             return 'Old password wrong!';
         };
