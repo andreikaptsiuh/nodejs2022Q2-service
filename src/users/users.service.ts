@@ -4,6 +4,7 @@ import { ResponseUserDto } from "./dto/response-user.dto";
 import { UpdatePasswordDto } from "./dto/update-password.dto";
 import { UserDto } from "./dto/user.dto";
 import { v4 as uuid } from 'uuid';
+import { DbEnum } from "src/untils/dbEnum";
 
 @Injectable()
 export class UsersService {
@@ -22,8 +23,10 @@ export class UsersService {
         });
     }
 
-    findOne(userId: string): ResponseUserDto {
+    findOne(userId: string): ResponseUserDto | DbEnum {
         const user = this.users.find((user) => user.id === userId);
+        if (!user) return DbEnum.notFound;
+
         const { id, login, version, createdAt, updatedAt } = user;
 
         return {
@@ -53,30 +56,34 @@ export class UsersService {
         return createdUser;
     }
 
-    updatePassword(userId: string, passwords: UpdatePasswordDto): UserDto | string {
+    updatePassword(userId: string, passwords: UpdatePasswordDto): UserDto | DbEnum {
         const userForUpdate = this.users.find((user) => user.id === userId);
 
-        if (userForUpdate.password === passwords.oldPassowrd) {
+        if (!userForUpdate) {
+            return DbEnum.notFound;
+        }
+
+        if (userForUpdate.password === passwords.oldPassword) {
             userForUpdate.password = passwords.newPassword;
             userForUpdate.updatedAt = Date.now();
-            userForUpdate.updatedAt++;
+            userForUpdate.version++;
             return userForUpdate;
         } else {
-            return 'Incorrect old password';
+            return DbEnum.incorrectFiels;
         }
     }
 
-    delete(userId: string): string {
+    delete(userId: string): DbEnum | string {
         const user = this.users.find((user) => user.id === userId);
 
         if(!user) {
-            return `User with id: ${userId} not found`;
+            return DbEnum.notFound;
         };
 
         const deleteUserIndex = this.users.indexOf(user);
         this.users.splice(deleteUserIndex);
 
-        return 'User was deleted';
+        return 'User was deleted!';
     }
 
     _createUserId(): string {
