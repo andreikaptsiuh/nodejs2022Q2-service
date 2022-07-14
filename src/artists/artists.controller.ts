@@ -59,7 +59,7 @@ export class ArtistsController {
 
         if(result === DbEnum.notFound) {
             res.status(HttpStatus.NOT_FOUND);
-            return `User with id: ${id} not found`;
+            return `Artist with id: ${id} not found`;
         };
 
         return result as ArtistDto;
