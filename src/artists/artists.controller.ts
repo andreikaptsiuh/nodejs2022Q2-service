@@ -1,5 +1,7 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Res } from '@nestjs/common';
 import { Response } from 'express';
+import { CreateTrackDto } from 'src/tracks/dto/create-track.dto';
+import { TracksService } from 'src/tracks/tracks.service';
 import { DbEnum } from 'src/untils/dbEnum';
 import { validate } from 'uuid';
 import { ArtistsService } from './artists.service';
@@ -9,7 +11,10 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 
 @Controller('artist')
 export class ArtistsController {
-    constructor(private readonly artistsService: ArtistsService) {}
+    constructor(
+        private readonly artistsService: ArtistsService,
+        private readonly tracksService: TracksService
+    ) {}
 
     @Get()
     findAll(): ArtistDto[] {
@@ -78,6 +83,19 @@ export class ArtistsController {
             res.status(HttpStatus.NOT_FOUND);
             return `Artist with id: ${id} not found`;
         };
+
+        const allTracks = this.tracksService.findAll();
+        const artistTracks = allTracks.filter((track) => track.artistId === id);
+
+        artistTracks?.forEach((track) => {
+            const updatedTrack: CreateTrackDto = {
+                ...track,
+                artistId: null,
+                albumId: null
+            };
+            
+            this.tracksService.updateTrack(track.id, updatedTrack);
+        });
 
         res.status(HttpStatus.NO_CONTENT);
         return result as string;

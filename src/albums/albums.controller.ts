@@ -5,10 +5,15 @@ import { AlbumsService } from './albums.service';
 import { AlbumDto } from './dto/album.dto';
 import { DbEnum } from 'src/untils/dbEnum';
 import { CreateAlbumDto } from './dto/create-album.dto';
+import { TracksService } from 'src/tracks/tracks.service';
+import { CreateTrackDto } from 'src/tracks/dto/create-track.dto';
 
 @Controller('album')
 export class AlbumsController {
-    constructor(private readonly albumsService: AlbumsService) {}
+    constructor(
+        private readonly albumsService: AlbumsService,
+        private readonly tracksService: TracksService
+    ) {}
 
     @Get()
     findAll(): AlbumDto[] {
@@ -85,6 +90,18 @@ export class AlbumsController {
             res.status(HttpStatus.NOT_FOUND);
             return `Album with id: ${id} not found`;
         };
+
+        const allTracks = this.tracksService.findAll();
+        const albumTracks = allTracks.filter((track) => track.albumId === id);
+
+        albumTracks?.forEach((track) => {
+            const updatedTrack: CreateTrackDto = {
+                ...track,
+                albumId: null
+            };
+            
+            this.tracksService.updateTrack(track.id, updatedTrack);
+        });
 
         res.status(HttpStatus.NO_CONTENT);
         return result as string;

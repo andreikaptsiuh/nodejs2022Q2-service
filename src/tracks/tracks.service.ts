@@ -4,16 +4,16 @@ import { v4 as uuid } from 'uuid';
 import { CreateTrackDto } from "./dto/create-track.dto";
 import { TrackDto } from "./dto/track.dto";
 
+const TRACKS_DB: TrackDto[] = [];
+
 @Injectable()
 export class TracksService {
-    private tracks: TrackDto[] = [];
-
     findAll(): TrackDto[] {
-        return this.tracks;
+        return TRACKS_DB;
     }
 
     findOne(trackId: string): TrackDto | DbEnum {
-        const track = this.tracks.find((track) => track.id === trackId);
+        const track = TRACKS_DB.find((track) => track.id === trackId);
         if (!track) return DbEnum.notFound;
 
         return track;
@@ -25,13 +25,13 @@ export class TracksService {
             ...trackForCreate
         };
 
-        this.tracks.push(createdTrack);
+        TRACKS_DB.push(createdTrack);
 
         return createdTrack;
     }
 
     updateTrack(trackId: string, newTrackData: CreateTrackDto): TrackDto | DbEnum {
-        const trackForUpdate = this.tracks.find((track) => track.id === trackId);
+        const trackForUpdate = TRACKS_DB.find((track) => track.id === trackId);
 
         if (!trackForUpdate) {
             return DbEnum.notFound;
@@ -46,14 +46,14 @@ export class TracksService {
     }
 
     delete(trackId: string): DbEnum | string {
-        const artist = this.tracks.find((track) => track.id === trackId);
+        const artist = TRACKS_DB.find((track) => track.id === trackId);
 
         if(!artist) {
             return DbEnum.notFound;
         };
 
-        const deleteTrackIndex = this.tracks.indexOf(artist);
-        this.tracks.splice(deleteTrackIndex);
+        const deleteTrackIndex = TRACKS_DB.indexOf(artist);
+        TRACKS_DB.splice(deleteTrackIndex);
 
         return 'Artist was deleted!';
     }
