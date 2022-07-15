@@ -4,16 +4,16 @@ import { v4 as uuid } from 'uuid';
 import { AlbumDto } from "./dto/album.dto";
 import { CreateAlbumDto } from "./dto/create-album.dto";
 
+const ALBUMS_DB: AlbumDto[] = [];
+
 @Injectable()
 export class AlbumsService {
-    private albums: AlbumDto[] = [];
-
     findAll(): AlbumDto[] {
-        return this.albums;
+        return ALBUMS_DB;
     }
 
-    findOne(albumId: string): AlbumDto | DbEnum {
-        const album = this.albums.find((album) => album.id === albumId);
+    findOne(albumId: string): AlbumDto | DbEnum.notFound {
+        const album = ALBUMS_DB.find((album) => album.id === albumId);
         if (!album) return DbEnum.notFound;
 
         return album;
@@ -25,13 +25,13 @@ export class AlbumsService {
             ...albumForCreate
         };
 
-        this.albums.push(createdAlbum);
+        ALBUMS_DB.push(createdAlbum);
 
         return createdAlbum;
     }
 
     updateAlbum(albumId: string, newAlbumData: CreateAlbumDto): AlbumDto | DbEnum {
-        const albumForUpdate = this.albums.find((album) => album.id === albumId);
+        const albumForUpdate = ALBUMS_DB.find((album) => album.id === albumId);
 
         if (!albumForUpdate) {
             return DbEnum.notFound;
@@ -45,14 +45,14 @@ export class AlbumsService {
     }
 
     delete(albumId: string): DbEnum | string {
-        const album = this.albums.find((album) => album.id === albumId);
+        const album = ALBUMS_DB.find((album) => album.id === albumId);
 
         if(!album) {
             return DbEnum.notFound;
         };
 
-        const deleteAlbumIndex = this.albums.indexOf(album);
-        this.albums.splice(deleteAlbumIndex);
+        const deleteAlbumIndex = ALBUMS_DB.indexOf(album);
+        ALBUMS_DB.splice(deleteAlbumIndex);
 
         return 'Album was deleted!';
     }

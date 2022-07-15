@@ -5,16 +5,16 @@ import { v4 as uuid } from 'uuid';
 import { DbEnum } from "src/untils/dbEnum";
 import { UpdateArtistDto } from "./dto/update-artist.dto";
 
+const ARTISTS_DB: ArtistDto[] = [];
+
 @Injectable()
 export class ArtistsService {
-    private artists: ArtistDto[] = [];
-
     findAll(): ArtistDto[] {
-        return this.artists;
+        return ARTISTS_DB;
     }
 
-    findOne(artistId: string): ArtistDto | DbEnum {
-        const artist = this.artists.find((artist) => artist.id === artistId);
+    findOne(artistId: string): ArtistDto | DbEnum.notFound {
+        const artist = ARTISTS_DB.find((artist) => artist.id === artistId);
         if (!artist) return DbEnum.notFound;
 
         return artist;
@@ -26,13 +26,13 @@ export class ArtistsService {
             ...artistForCreate
         };
 
-        this.artists.push(createdartist);
+        ARTISTS_DB.push(createdartist);
 
         return createdartist;
     }
 
     updateArtist(artistId: string, newArtistData: UpdateArtistDto): ArtistDto | DbEnum {
-        const artistForUpdate = this.artists.find((artist) => artist.id === artistId);
+        const artistForUpdate = ARTISTS_DB.find((artist) => artist.id === artistId);
 
         if (!artistForUpdate) {
             return DbEnum.notFound;
@@ -50,14 +50,14 @@ export class ArtistsService {
     }
 
     delete(artistId: string): DbEnum | string {
-        const artist = this.artists.find((artist) => artist.id === artistId);
+        const artist = ARTISTS_DB.find((artist) => artist.id === artistId);
 
         if(!artist) {
             return DbEnum.notFound;
         };
 
-        const deleteartistIndex = this.artists.indexOf(artist);
-        this.artists.splice(deleteartistIndex);
+        const deleteartistIndex = ARTISTS_DB.indexOf(artist);
+        ARTISTS_DB.splice(deleteartistIndex);
 
         return 'Artist was deleted!';
     }

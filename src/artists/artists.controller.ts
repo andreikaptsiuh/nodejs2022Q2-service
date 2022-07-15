@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Res } from '@nestjs/common';
 import { Response } from 'express';
+import { FavoritesService } from 'src/favorites/favorites.service';
 import { CreateTrackDto } from 'src/tracks/dto/create-track.dto';
 import { TracksService } from 'src/tracks/tracks.service';
 import { DbEnum } from 'src/untils/dbEnum';
@@ -13,7 +14,8 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 export class ArtistsController {
     constructor(
         private readonly artistsService: ArtistsService,
-        private readonly tracksService: TracksService
+        private readonly tracksService: TracksService,
+        private readonly favoritesService: FavoritesService
     ) {}
 
     @Get()
@@ -30,7 +32,7 @@ export class ArtistsController {
 
         const result = this.artistsService.findOne(id);
 
-        if(result === DbEnum.notFound) {
+        if (result === DbEnum.notFound) {
             res.status(HttpStatus.NOT_FOUND);
             return `Artist with id: ${id} not found`;
         };
@@ -62,7 +64,7 @@ export class ArtistsController {
 
         const result = this.artistsService.updateArtist(id, newArtistData);
 
-        if(result === DbEnum.notFound) {
+        if (result === DbEnum.notFound) {
             res.status(HttpStatus.NOT_FOUND);
             return `Artist with id: ${id} not found`;
         };
@@ -79,10 +81,12 @@ export class ArtistsController {
 
         const result = this.artistsService.delete(id);
 
-        if(result === DbEnum.notFound) {
+        if (result === DbEnum.notFound) {
             res.status(HttpStatus.NOT_FOUND);
             return `Artist with id: ${id} not found`;
         };
+
+        this.favoritesService.deleteFavoriteArtist(id);
 
         const allTracks = this.tracksService.findAll();
         const artistTracks = allTracks.filter((track) => track.artistId === id);

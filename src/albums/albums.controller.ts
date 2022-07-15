@@ -7,12 +7,14 @@ import { DbEnum } from 'src/untils/dbEnum';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { TracksService } from 'src/tracks/tracks.service';
 import { CreateTrackDto } from 'src/tracks/dto/create-track.dto';
+import { FavoritesService } from 'src/favorites/favorites.service';
 
 @Controller('album')
 export class AlbumsController {
     constructor(
         private readonly albumsService: AlbumsService,
-        private readonly tracksService: TracksService
+        private readonly tracksService: TracksService,
+        private readonly favoritesService: FavoritesService
     ) {}
 
     @Get()
@@ -29,7 +31,7 @@ export class AlbumsController {
 
         const result = this.albumsService.findOne(id);
 
-        if(result === DbEnum.notFound) {
+        if (result === DbEnum.notFound) {
             res.status(HttpStatus.NOT_FOUND);
             return `Album with id: ${id} not found`;
         };
@@ -69,7 +71,7 @@ export class AlbumsController {
 
         const result = this.albumsService.updateAlbum(id, newAlbumData);
 
-        if(result === DbEnum.notFound) {
+        if (result === DbEnum.notFound) {
             res.status(HttpStatus.NOT_FOUND);
             return `Album with id: ${id} not found`;
         };
@@ -86,10 +88,12 @@ export class AlbumsController {
 
         const result = this.albumsService.delete(id);
 
-        if(result === DbEnum.notFound) {
+        if (result === DbEnum.notFound) {
             res.status(HttpStatus.NOT_FOUND);
             return `Album with id: ${id} not found`;
         };
+
+        this.favoritesService.deleteFavoriteAlbum(id);
 
         const allTracks = this.tracksService.findAll();
         const albumTracks = allTracks.filter((track) => track.albumId === id);

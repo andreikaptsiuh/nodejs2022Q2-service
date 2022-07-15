@@ -5,10 +5,14 @@ import { TrackDto } from './dto/track.dto';
 import { TracksService } from './tracks.service';
 import { DbEnum } from 'src/untils/dbEnum';
 import { CreateTrackDto } from './dto/create-track.dto';
+import { FavoritesService } from 'src/favorites/favorites.service';
 
 @Controller('track')
 export class TracksController {
-    constructor(private readonly tracksService: TracksService) {}
+    constructor(
+        private readonly tracksService: TracksService,
+        private readonly favoritesService: FavoritesService
+    ) {}
 
     @Get()
     findAll(): TrackDto[] {
@@ -24,7 +28,7 @@ export class TracksController {
 
         const result = this.tracksService.findOne(id);
 
-        if(result === DbEnum.notFound) {
+        if (result === DbEnum.notFound) {
             res.status(HttpStatus.NOT_FOUND);
             return `Track with id: ${id} not found`;
         };
@@ -66,7 +70,7 @@ export class TracksController {
 
         const result = this.tracksService.updateTrack(id, newTracktData);
 
-        if(result === DbEnum.notFound) {
+        if (result === DbEnum.notFound) {
             res.status(HttpStatus.NOT_FOUND);
             return `Track with id: ${id} not found`;
         };
@@ -83,12 +87,14 @@ export class TracksController {
 
         const result = this.tracksService.delete(id);
 
-        if(result === DbEnum.notFound) {
+        if (result === DbEnum.notFound) {
             res.status(HttpStatus.NOT_FOUND);
             return `Track with id: ${id} not found`;
         };
 
+        this.favoritesService.deleteFavoriteTrack(id);
+
         res.status(HttpStatus.NO_CONTENT);
         return result as string;
     }
-}
+};

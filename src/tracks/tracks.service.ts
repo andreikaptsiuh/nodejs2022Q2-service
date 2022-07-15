@@ -12,7 +12,7 @@ export class TracksService {
         return TRACKS_DB;
     }
 
-    findOne(trackId: string): TrackDto | DbEnum {
+    findOne(trackId: string): TrackDto | DbEnum.notFound {
         const track = TRACKS_DB.find((track) => track.id === trackId);
         if (!track) return DbEnum.notFound;
 
