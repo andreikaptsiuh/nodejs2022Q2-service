@@ -1,4 +1,4 @@
 export enum DbEnum {
-    notFound,
-    incorrectFields
-};
+  notFound,
+  incorrectFields,
+}

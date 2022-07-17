@@ -19,8 +19,26 @@ npm install
 
 ## Running application
 
+In .env.example file remove .example part.
+
 ```
 npm start
+```
+
+Start app
+
+```
+npm start:dev
+```
+
+Start app in development mode
+
+```
+npm run start:prod
+```
+
+Start app in prodaction mode
+
 ```
 
 After starting the app on port (4000 as default) you can open

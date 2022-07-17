@@ -11,16 +11,15 @@ import { FavoritesModule } from './favorites/favorites.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env'
-    }), 
+      envFilePath: '.env',
+    }),
     UsersModule,
     ArtistsModule,
     TracksModule,
     AlbumsModule,
-    FavoritesModule
+    FavoritesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-
-export class AppModule {};
+export class AppModule {}

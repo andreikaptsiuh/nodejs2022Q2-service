@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Res,
+} from '@nestjs/common';
 import { validate } from 'uuid';
 import { Response } from 'express';
 import { AlbumsService } from './albums.service';
@@ -11,103 +21,119 @@ import { FavoritesService } from 'src/favorites/favorites.service';
 
 @Controller('album')
 export class AlbumsController {
-    constructor(
-        private readonly albumsService: AlbumsService,
-        private readonly tracksService: TracksService,
-        private readonly favoritesService: FavoritesService
-    ) {}
+  constructor(
+    private readonly albumsService: AlbumsService,
+    private readonly tracksService: TracksService,
+    private readonly favoritesService: FavoritesService,
+  ) {}
 
-    @Get()
-    findAll(): AlbumDto[] {
-        return this.albumsService.findAll();
+  @Get()
+  findAll(): AlbumDto[] {
+    return this.albumsService.findAll();
+  }
+
+  @Get(':id')
+  findOne(
+    @Res({ passthrough: true }) res: Response,
+    @Param('id') id: string,
+  ): AlbumDto | string {
+    if (!validate(id)) {
+      res.status(HttpStatus.BAD_REQUEST);
+      return 'Id not valid';
     }
 
-    @Get(':id')
-    findOne(@Res({ passthrough: true }) res: Response, @Param('id') id: string): AlbumDto | string {
-        if (!validate(id)) {
-            res.status(HttpStatus.BAD_REQUEST);
-            return 'Id not valid';
-        };
+    const result = this.albumsService.findOne(id);
 
-        const result = this.albumsService.findOne(id);
-
-        if (result === DbEnum.notFound) {
-            res.status(HttpStatus.NOT_FOUND);
-            return `Album with id: ${id} not found`;
-        };
-
-        return result as AlbumDto;
+    if (result === DbEnum.notFound) {
+      res.status(HttpStatus.NOT_FOUND);
+      return `Album with id: ${id} not found`;
     }
 
-    @Post()
-    create(@Res({ passthrough: true }) res: Response, @Body() createAlbum: CreateAlbumDto): AlbumDto | string {
-        if (
-                createAlbum.artistId === undefined || 
-                typeof createAlbum.name !== 'string' || 
-                typeof createAlbum.year !== 'number'
-            ) {
-            res.status(HttpStatus.BAD_REQUEST);
-            return 'Name, year and artistId fields is required!';
-        };
+    return result as AlbumDto;
+  }
 
-        return this.albumsService.create(createAlbum);
+  @Post()
+  create(
+    @Res({ passthrough: true }) res: Response,
+    @Body() createAlbum: CreateAlbumDto,
+  ): AlbumDto | string {
+    if (
+      createAlbum.artistId === undefined ||
+      typeof createAlbum.name !== 'string' ||
+      typeof createAlbum.year !== 'number'
+    ) {
+      res.status(HttpStatus.BAD_REQUEST);
+      return 'Name, year and artistId fields is required!';
     }
 
-    @Put(':id')
-    update(@Res({ passthrough: true }) res: Response, @Param('id') id: string, @Body() newAlbumData: CreateAlbumDto): AlbumDto | string {
-        if (!validate(id)) {
-            res.status(HttpStatus.BAD_REQUEST);
-            return 'Id not valid';
-        };
+    return this.albumsService.create(createAlbum);
+  }
 
-        if (
-            newAlbumData.artistId === undefined || 
-            typeof newAlbumData.name !== 'string' || 
-            typeof newAlbumData.year !== 'number'
-        ) {
-            res.status(HttpStatus.BAD_REQUEST);
-            return 'Name, year and artistId fields is required!';
-        }
-
-        const result = this.albumsService.updateAlbum(id, newAlbumData);
-
-        if (result === DbEnum.notFound) {
-            res.status(HttpStatus.NOT_FOUND);
-            return `Album with id: ${id} not found`;
-        };
-
-        return result as AlbumDto;
+  @Put(':id')
+  update(
+    @Res({ passthrough: true }) res: Response,
+    @Param('id') id: string,
+    @Body() newAlbumData: CreateAlbumDto,
+  ): AlbumDto | string {
+    if (!validate(id)) {
+      res.status(HttpStatus.BAD_REQUEST);
+      return 'Id not valid';
     }
 
-    @Delete(':id')
-    delete(@Res({ passthrough: true }) res: Response, @Param('id') id: string): string {
-        if (!validate(id)) {
-            res.status(HttpStatus.BAD_REQUEST);
-            return 'Id not valid';
-        };
-
-        const result = this.albumsService.delete(id);
-
-        if (result === DbEnum.notFound) {
-            res.status(HttpStatus.NOT_FOUND);
-            return `Album with id: ${id} not found`;
-        };
-
-        this.favoritesService.deleteFavoriteAlbum(id);
-
-        const allTracks = this.tracksService.findAll();
-        const albumTracks = allTracks.filter((track) => track.albumId === id);
-
-        albumTracks?.forEach((track) => {
-            const updatedTrack: CreateTrackDto = {
-                ...track,
-                albumId: null
-            };
-            
-            this.tracksService.updateTrack(track.id, updatedTrack);
-        });
-
-        res.status(HttpStatus.NO_CONTENT);
-        return result as string;
+    if (
+      newAlbumData.artistId === undefined ||
+      typeof newAlbumData.name !== 'string' ||
+      typeof newAlbumData.year !== 'number'
+    ) {
+      res.status(HttpStatus.BAD_REQUEST);
+      return 'Name, year and artistId fields is required!';
     }
-};
+
+    const result = this.albumsService.updateAlbum(id, newAlbumData);
+
+    if (result === DbEnum.notFound) {
+      res.status(HttpStatus.NOT_FOUND);
+      return `Album with id: ${id} not found`;
+    }
+
+    return result as AlbumDto;
+  }
+
+  @Delete(':id')
+  delete(
+    @Res({ passthrough: true }) res: Response,
+    @Param('id') id: string,
+  ): string {
+    if (!validate(id)) {
+      res.status(HttpStatus.BAD_REQUEST);
+      return 'Id not valid';
+    }
+
+    const result = this.albumsService.delete(id);
+
+    if (result === DbEnum.notFound) {
+      res.status(HttpStatus.NOT_FOUND);
+      return `Album with id: ${id} not found`;
+    }
+
+    const deleteFromFavorites = this.favoritesService.deleteFavoriteAlbum(id);
+    if (deleteFromFavorites !== DbEnum.notFound) {
+      console.log(deleteFromFavorites);
+    }
+
+    const allTracks = this.tracksService.findAll();
+    const albumTracks = allTracks.filter((track) => track.albumId === id);
+
+    albumTracks?.forEach((track) => {
+      const updatedTrack: CreateTrackDto = {
+        ...track,
+        albumId: null,
+      };
+
+      this.tracksService.updateTrack(track.id, updatedTrack);
+    });
+
+    res.status(HttpStatus.NO_CONTENT);
+    return result as string;
+  }
+}
