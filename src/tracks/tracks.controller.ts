@@ -25,21 +25,21 @@ export class TracksController {
   ) {}
 
   @Get()
-  findAll(): TrackDto[] {
-    return this.tracksService.findAll();
+  async findAll(): Promise<TrackDto[]> {
+    return await this.tracksService.findAll();
   }
 
   @Get(':id')
-  findOne(
+  async findOne(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): TrackDto | string {
+  ): Promise<string | TrackDto> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const result = this.tracksService.findOne(id);
+    const result = await this.tracksService.findOne(id);
 
     if (result === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);
@@ -50,10 +50,10 @@ export class TracksController {
   }
 
   @Post()
-  create(
+  async create(
     @Res({ passthrough: true }) res: Response,
     @Body() createTrack: CreateTrackDto,
-  ): TrackDto | string {
+  ): Promise<string | TrackDto> {
     if (
       createTrack.albumId === undefined ||
       createTrack.artistId === undefined ||
@@ -64,15 +64,15 @@ export class TracksController {
       return 'Name, duration, artistId and albumId fields is required!';
     }
 
-    return this.tracksService.create(createTrack);
+    return await this.tracksService.create(createTrack);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
     @Body() newTracktData: CreateTrackDto,
-  ): TrackDto | string {
+  ): Promise<string | TrackDto> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
@@ -88,7 +88,7 @@ export class TracksController {
       return 'Name, duration, artistId and albumId fields is required!';
     }
 
-    const result = this.tracksService.updateTrack(id, newTracktData);
+    const result = await this.tracksService.updateTrack(id, newTracktData);
 
     if (result === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);
@@ -99,23 +99,25 @@ export class TracksController {
   }
 
   @Delete(':id')
-  delete(
+  async delete(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): string {
+  ): Promise<string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const result = this.tracksService.delete(id);
+    const result = await this.tracksService.delete(id);
 
     if (result === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);
       return `Track with id: ${id} not found`;
     }
 
-    const deleteFromFavorites = this.favoritesService.deleteFavoriteTrack(id);
+    const deleteFromFavorites = await this.favoritesService.deleteFavoriteTrack(
+      id,
+    );
     if (deleteFromFavorites !== DbEnum.notFound) {
       console.log(deleteFromFavorites);
     }

@@ -4,23 +4,22 @@ import { ArtistDto } from './dto/artist.dto';
 import { v4 as uuid } from 'uuid';
 import { DbEnum } from 'src/untils/dbEnum';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-
-const ARTISTS_DB: ArtistDto[] = [];
+import { ARTISTS_DB } from 'src/myDb/myDb';
 
 @Injectable()
 export class ArtistsService {
-  findAll(): ArtistDto[] {
+  async findAll(): Promise<ArtistDto[]> {
     return ARTISTS_DB;
   }
 
-  findOne(artistId: string): ArtistDto | DbEnum.notFound {
+  async findOne(artistId: string): Promise<ArtistDto | DbEnum.notFound> {
     const artist = ARTISTS_DB.find((artist) => artist.id === artistId);
     if (!artist) return DbEnum.notFound;
 
     return artist;
   }
 
-  create(artistForCreate: CreateArtistDto): ArtistDto {
+  async create(artistForCreate: CreateArtistDto): Promise<ArtistDto> {
     const createdartist: ArtistDto = {
       id: this._createArtistId(),
       ...artistForCreate,
@@ -31,10 +30,10 @@ export class ArtistsService {
     return createdartist;
   }
 
-  updateArtist(
+  async updateArtist(
     artistId: string,
     newArtistData: UpdateArtistDto,
-  ): ArtistDto | DbEnum {
+  ): Promise<ArtistDto | DbEnum> {
     const artistForUpdate = ARTISTS_DB.find((artist) => artist.id === artistId);
 
     if (!artistForUpdate) {
@@ -52,7 +51,7 @@ export class ArtistsService {
     return artistForUpdate;
   }
 
-  delete(artistId: string): DbEnum | string {
+  async delete(artistId: string): Promise<string | DbEnum> {
     const artist = ARTISTS_DB.find((artist) => artist.id === artistId);
 
     if (!artist) {

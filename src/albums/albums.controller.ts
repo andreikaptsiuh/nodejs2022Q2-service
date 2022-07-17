@@ -33,16 +33,16 @@ export class AlbumsController {
   }
 
   @Get(':id')
-  findOne(
+  async findOne(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): AlbumDto | string {
+  ): Promise<string | AlbumDto> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const result = this.albumsService.findOne(id);
+    const result = await this.albumsService.findOne(id);
 
     if (result === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);
@@ -53,10 +53,10 @@ export class AlbumsController {
   }
 
   @Post()
-  create(
+  async create(
     @Res({ passthrough: true }) res: Response,
     @Body() createAlbum: CreateAlbumDto,
-  ): AlbumDto | string {
+  ): Promise<string | AlbumDto> {
     if (
       createAlbum.artistId === undefined ||
       typeof createAlbum.name !== 'string' ||
@@ -66,15 +66,15 @@ export class AlbumsController {
       return 'Name, year and artistId fields is required!';
     }
 
-    return this.albumsService.create(createAlbum);
+    return await this.albumsService.create(createAlbum);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
     @Body() newAlbumData: CreateAlbumDto,
-  ): AlbumDto | string {
+  ): Promise<string | AlbumDto> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
@@ -89,7 +89,7 @@ export class AlbumsController {
       return 'Name, year and artistId fields is required!';
     }
 
-    const result = this.albumsService.updateAlbum(id, newAlbumData);
+    const result = await this.albumsService.updateAlbum(id, newAlbumData);
 
     if (result === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);
@@ -100,28 +100,30 @@ export class AlbumsController {
   }
 
   @Delete(':id')
-  delete(
+  async delete(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): string {
+  ): Promise<string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const result = this.albumsService.delete(id);
+    const result = await this.albumsService.delete(id);
 
     if (result === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);
       return `Album with id: ${id} not found`;
     }
 
-    const deleteFromFavorites = this.favoritesService.deleteFavoriteAlbum(id);
+    const deleteFromFavorites = await this.favoritesService.deleteFavoriteAlbum(
+      id,
+    );
     if (deleteFromFavorites !== DbEnum.notFound) {
       console.log(deleteFromFavorites);
     }
 
-    const allTracks = this.tracksService.findAll();
+    const allTracks = await this.tracksService.findAll();
     const albumTracks = allTracks.filter((track) => track.albumId === id);
 
     albumTracks?.forEach((track) => {

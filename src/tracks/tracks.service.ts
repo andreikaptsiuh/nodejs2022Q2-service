@@ -1,25 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import { TRACKS_DB } from 'src/myDb/myDb';
 import { DbEnum } from 'src/untils/dbEnum';
 import { v4 as uuid } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { TrackDto } from './dto/track.dto';
 
-const TRACKS_DB: TrackDto[] = [];
-
 @Injectable()
 export class TracksService {
-  findAll(): TrackDto[] {
+  async findAll(): Promise<TrackDto[]> {
     return TRACKS_DB;
   }
 
-  findOne(trackId: string): TrackDto | DbEnum.notFound {
+  async findOne(trackId: string): Promise<TrackDto | DbEnum.notFound> {
     const track = TRACKS_DB.find((track) => track.id === trackId);
     if (!track) return DbEnum.notFound;
 
     return track;
   }
 
-  create(trackForCreate: CreateTrackDto): TrackDto {
+  async create(trackForCreate: CreateTrackDto): Promise<TrackDto> {
     const createdTrack: TrackDto = {
       id: this._createId(),
       ...trackForCreate,
@@ -30,10 +29,10 @@ export class TracksService {
     return createdTrack;
   }
 
-  updateTrack(
+  async updateTrack(
     trackId: string,
     newTrackData: CreateTrackDto,
-  ): TrackDto | DbEnum {
+  ): Promise<TrackDto | DbEnum> {
     const trackForUpdate = TRACKS_DB.find((track) => track.id === trackId);
 
     if (!trackForUpdate) {
@@ -48,7 +47,7 @@ export class TracksService {
     return trackForUpdate;
   }
 
-  delete(trackId: string): DbEnum | string {
+  async delete(trackId: string): Promise<string | DbEnum> {
     const artist = TRACKS_DB.find((track) => track.id === trackId);
 
     if (!artist) {

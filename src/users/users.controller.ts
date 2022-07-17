@@ -23,21 +23,21 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll(): ResponseUserDto[] {
-    return this.usersService.findAll();
+  async findAll(): Promise<ResponseUserDto[]> {
+    return await this.usersService.findAll();
   }
 
   @Get(':id')
-  findOne(
+  async findOne(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): ResponseUserDto | string {
+  ): Promise<ResponseUserDto | string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const result = this.usersService.findOne(id);
+    const result = await this.usersService.findOne(id);
 
     if (result === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);
@@ -48,24 +48,24 @@ export class UsersController {
   }
 
   @Post()
-  create(
+  async create(
     @Res({ passthrough: true }) res: Response,
     @Body() createUser: CreateUserDto,
-  ): ResponseUserDto | string {
+  ): Promise<ResponseUserDto | string> {
     if (!createUser.login || !createUser.password) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Login and password fields is required!';
     }
 
-    return this.usersService.create(createUser);
+    return await this.usersService.create(createUser);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
     @Body() passwords: UpdatePasswordDto,
-  ): ResponseUserDto | string {
+  ): Promise<ResponseUserDto | string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
@@ -79,7 +79,7 @@ export class UsersController {
       return 'Old password and new password fields is required!';
     }
 
-    const result = this.usersService.updatePassword(id, passwords);
+    const result = await this.usersService.updatePassword(id, passwords);
 
     if (result === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);
@@ -95,16 +95,16 @@ export class UsersController {
   }
 
   @Delete(':id')
-  delete(
+  async delete(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): string {
+  ): Promise<string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const result = this.usersService.delete(id);
+    const result = await this.usersService.delete(id);
 
     if (result === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);

@@ -29,27 +29,31 @@ export class FavoritesController {
   ) {}
 
   @Get()
-  findAll(): FavoritesRepsonse {
-    const favorites = this.favoritesService.findAllFavorites();
+  async findAll(): Promise<FavoritesRepsonse> {
+    const favorites = await this.favoritesService.findAllFavorites();
 
-    const artists: ArtistDto[] = favorites.artists.map((id) => {
-      const artist = this.artistsService.findOne(id);
+    const artists: ArtistDto[] = [];
+
+    favorites.artists.forEach(async (id) => {
+      const artist = await this.artistsService.findOne(id);
       if (artist !== DbEnum.notFound) {
-        return artist;
+        artists.push(artist);
       }
     });
 
-    const albums: AlbumDto[] = favorites.albums.map((id) => {
-      const album = this.albumsService.findOne(id);
+    const albums: AlbumDto[] = [];
+    favorites.albums.forEach(async (id) => {
+      const album = await this.albumsService.findOne(id);
       if (album !== DbEnum.notFound) {
-        return album;
+        albums.push(album);
       }
     });
 
-    const tracks: TrackDto[] = favorites.tracks.map((id) => {
-      const track = this.tracksService.findOne(id);
+    const tracks: TrackDto[] = [];
+    favorites.tracks.forEach(async (id) => {
+      const track = await this.tracksService.findOne(id);
       if (track !== DbEnum.notFound) {
-        return track;
+        tracks.push(track);
       }
     });
 
@@ -64,36 +68,36 @@ export class FavoritesController {
 
   // Tracks
   @Post('track/:id')
-  addTrack(
+  async addTrack(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): string {
+  ): Promise<string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const track = this.tracksService.findOne(id);
+    const track = await this.tracksService.findOne(id);
     if (track === DbEnum.notFound) {
       res.status(HttpStatus.UNPROCESSABLE_ENTITY);
       return 'Track with this id not found!';
     }
 
-    const response = this.favoritesService.addFavoriteTrack(id);
+    const response = await this.favoritesService.addFavoriteTrack(id);
     return response;
   }
 
   @Delete('track/:id')
-  deleteTrack(
+  async deleteTrack(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): string {
+  ): Promise<string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const response = this.favoritesService.deleteFavoriteTrack(id);
+    const response = await this.favoritesService.deleteFavoriteTrack(id);
 
     if (response === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);
@@ -106,36 +110,36 @@ export class FavoritesController {
 
   // Albums
   @Post('album/:id')
-  addAlbum(
+  async addAlbum(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): string {
+  ): Promise<string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const album = this.albumsService.findOne(id);
+    const album = await this.albumsService.findOne(id);
     if (album === DbEnum.notFound) {
       res.status(HttpStatus.UNPROCESSABLE_ENTITY);
       return 'Album with this id not found!';
     }
 
-    const response = this.favoritesService.addFavoriteAlbum(id);
+    const response = await this.favoritesService.addFavoriteAlbum(id);
     return response;
   }
 
   @Delete('album/:id')
-  deleteAlbum(
+  async deleteAlbum(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): string {
+  ): Promise<string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const response = this.favoritesService.deleteFavoriteAlbum(id);
+    const response = await this.favoritesService.deleteFavoriteAlbum(id);
 
     if (response === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);
@@ -148,36 +152,36 @@ export class FavoritesController {
 
   // Artists
   @Post('artist/:id')
-  addArtist(
+  async addArtist(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): string {
+  ): Promise<string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const artist = this.artistsService.findOne(id);
+    const artist = await this.artistsService.findOne(id);
     if (artist === DbEnum.notFound) {
       res.status(HttpStatus.UNPROCESSABLE_ENTITY);
       return 'Artist with this id not found!';
     }
 
-    const response = this.favoritesService.addFavoriteArtist(id);
+    const response = await this.favoritesService.addFavoriteArtist(id);
     return response;
   }
 
   @Delete('artist/:id')
-  deleteArtist(
+  async deleteArtist(
     @Res({ passthrough: true }) res: Response,
     @Param('id') id: string,
-  ): string {
+  ): Promise<string> {
     if (!validate(id)) {
       res.status(HttpStatus.BAD_REQUEST);
       return 'Id not valid';
     }
 
-    const response = this.favoritesService.deleteFavoriteArtist(id);
+    const response = await this.favoritesService.deleteFavoriteArtist(id);
 
     if (response === DbEnum.notFound) {
       res.status(HttpStatus.NOT_FOUND);

@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { ALBUMS_DB } from 'src/myDb/myDb';
 import { DbEnum } from 'src/untils/dbEnum';
 import { v4 as uuid } from 'uuid';
 import { AlbumDto } from './dto/album.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
-
-const ALBUMS_DB: AlbumDto[] = [];
 
 @Injectable()
 export class AlbumsService {
@@ -12,14 +11,14 @@ export class AlbumsService {
     return ALBUMS_DB;
   }
 
-  findOne(albumId: string): AlbumDto | DbEnum.notFound {
+  async findOne(albumId: string): Promise<AlbumDto | DbEnum.notFound> {
     const album = ALBUMS_DB.find((album) => album.id === albumId);
     if (!album) return DbEnum.notFound;
 
     return album;
   }
 
-  create(albumForCreate: CreateAlbumDto): AlbumDto {
+  async create(albumForCreate: CreateAlbumDto): Promise<AlbumDto> {
     const createdAlbum: AlbumDto = {
       id: this._createId(),
       ...albumForCreate,
@@ -30,10 +29,10 @@ export class AlbumsService {
     return createdAlbum;
   }
 
-  updateAlbum(
+  async updateAlbum(
     albumId: string,
     newAlbumData: CreateAlbumDto,
-  ): AlbumDto | DbEnum {
+  ): Promise<AlbumDto | DbEnum> {
     const albumForUpdate = ALBUMS_DB.find((album) => album.id === albumId);
 
     if (!albumForUpdate) {
@@ -47,7 +46,7 @@ export class AlbumsService {
     return albumForUpdate;
   }
 
-  delete(albumId: string): DbEnum | string {
+  async delete(albumId: string): Promise<string | DbEnum> {
     const album = ALBUMS_DB.find((album) => album.id === albumId);
 
     if (!album) {

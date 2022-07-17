@@ -1,22 +1,23 @@
 import { Injectable } from '@nestjs/common';
+import { FAVORITES_DB } from 'src/myDb/myDb';
 import { DbEnum } from 'src/untils/dbEnum';
 import { FavoritesDto } from './dto/favorites.dto';
 
-const FAVORITES_DB: FavoritesDto = { artists: [], albums: [], tracks: [] };
-
 @Injectable()
 export class FavoritesService {
-  findAllFavorites(): FavoritesDto {
+  async findAllFavorites(): Promise<FavoritesDto> {
     return FAVORITES_DB;
   }
 
   // Artists
-  addFavoriteArtist(artistId: string): string {
+  async addFavoriteArtist(artistId: string): Promise<string> {
     FAVORITES_DB.artists.push(artistId);
     return 'Artist added to favorites!';
   }
 
-  deleteFavoriteArtist(artistId: string): string | DbEnum.notFound {
+  async deleteFavoriteArtist(
+    artistId: string,
+  ): Promise<string | DbEnum.notFound> {
     const artist = FAVORITES_DB.artists.find((id) => id === artistId);
 
     if (!artist) {
@@ -30,12 +31,14 @@ export class FavoritesService {
   }
 
   // Albums
-  addFavoriteAlbum(albumtId: string): string {
+  async addFavoriteAlbum(albumtId: string): Promise<string> {
     FAVORITES_DB.albums.push(albumtId);
     return 'Album added to favorites!';
   }
 
-  deleteFavoriteAlbum(albumtId: string): string | DbEnum.notFound {
+  async deleteFavoriteAlbum(
+    albumtId: string,
+  ): Promise<string | DbEnum.notFound> {
     const album = FAVORITES_DB.albums.find((id) => id === albumtId);
 
     if (!album) {
@@ -49,12 +52,14 @@ export class FavoritesService {
   }
 
   // Tracks
-  addFavoriteTrack(trackId: string): string {
+  async addFavoriteTrack(trackId: string): Promise<string> {
     FAVORITES_DB.tracks.push(trackId);
     return 'Track added to favorites!';
   }
 
-  deleteFavoriteTrack(trackId: string): string | DbEnum.notFound {
+  async deleteFavoriteTrack(
+    trackId: string,
+  ): Promise<string | DbEnum.notFound> {
     const track = FAVORITES_DB.tracks.find((id) => id === trackId);
 
     if (!track) {

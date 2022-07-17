@@ -5,13 +5,12 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserDto } from './dto/user.dto';
 import { v4 as uuid } from 'uuid';
 import { DbEnum } from 'src/untils/dbEnum';
+import { USERS_DB } from 'src/myDb/myDb';
 
 @Injectable()
 export class UsersService {
-  private users: UserDto[] = [];
-
-  findAll(): ResponseUserDto[] {
-    return this.users.map((user) => {
+  async findAll(): Promise<ResponseUserDto[]> {
+    return USERS_DB.map((user) => {
       const { id, login, version, createdAt, updatedAt } = user;
       return {
         id,
@@ -23,8 +22,8 @@ export class UsersService {
     });
   }
 
-  findOne(userId: string): ResponseUserDto | DbEnum {
-    const user = this.users.find((user) => user.id === userId);
+  async findOne(userId: string): Promise<ResponseUserDto | DbEnum> {
+    const user = USERS_DB.find((user) => user.id === userId);
     if (!user) return DbEnum.notFound;
 
     const { id, login, version, createdAt, updatedAt } = user;
@@ -38,7 +37,7 @@ export class UsersService {
     };
   }
 
-  create(userForCreate: CreateUserDto): ResponseUserDto {
+  async create(userForCreate: CreateUserDto): Promise<ResponseUserDto> {
     const { login, password } = userForCreate;
     const createDate = Date.now();
 
@@ -51,7 +50,7 @@ export class UsersService {
       updatedAt: createDate,
     };
 
-    this.users.push(createdUser);
+    USERS_DB.push(createdUser);
 
     return {
       id: createdUser.id,
@@ -62,11 +61,11 @@ export class UsersService {
     } as ResponseUserDto;
   }
 
-  updatePassword(
+  async updatePassword(
     userId: string,
     passwords: UpdatePasswordDto,
-  ): ResponseUserDto | DbEnum {
-    const userForUpdate = this.users.find((user) => user.id === userId);
+  ): Promise<ResponseUserDto | DbEnum> {
+    const userForUpdate = USERS_DB.find((user) => user.id === userId);
 
     if (!userForUpdate) {
       return DbEnum.notFound;
@@ -84,15 +83,15 @@ export class UsersService {
     return { id, login, version, createdAt, updatedAt } as ResponseUserDto;
   }
 
-  delete(userId: string): DbEnum | string {
-    const user = this.users.find((user) => user.id === userId);
+  async delete(userId: string): Promise<string | DbEnum> {
+    const user = USERS_DB.find((user) => user.id === userId);
 
     if (!user) {
       return DbEnum.notFound;
     }
 
-    const deleteUserIndex = this.users.indexOf(user);
-    this.users.splice(deleteUserIndex);
+    const deleteUserIndex = USERS_DB.indexOf(user);
+    USERS_DB.splice(deleteUserIndex);
 
     return 'User was deleted!';
   }

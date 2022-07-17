@@ -8,7 +8,7 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone https://github.com/andreikaptsiuh/nodejs2022Q2-service/tree/basic
 ```
 
 ## Installing NPM modules
