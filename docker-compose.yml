@@ -29,3 +29,7 @@ services:
       - ${PORT}:${PORT}
     volumes:
       - /usr/src/app/src
+
+networks:
+  postgress:
+    driver: bridge
