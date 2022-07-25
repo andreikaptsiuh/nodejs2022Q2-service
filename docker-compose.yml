@@ -1,0 +1,35 @@
+version: '3.4'
+
+volumes:
+  data:
+
+services:
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    build: 
+      dockerfile: ./database/Dockerfile
+    command: postgres -c logging_collector=on
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    volumes:
+      - data:/var/lib/postgresql
+
+  service-app:
+    image: service-app
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - /usr/src/app/src
+
+networks:
+  postgress:
+    driver: bridge
